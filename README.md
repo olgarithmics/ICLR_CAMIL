@@ -1,4 +1,4 @@
-# ICLR_CAMIL
+# CAMIL: Context-Aware Multiple Instance Learning for Cancer Detection and Subtyping in Whole Slide Images
 This is the implementation of our ICLR (spotlight) [paper](https://arxiv.org/abs/2305.05314) (work in progress)
 
 ![Pipeline](assets/pipeline.png "An overview of the CAMIL model architecture. First, WSIs are preprocessed to separate tissue

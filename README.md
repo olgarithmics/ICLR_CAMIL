@@ -1,4 +1,5 @@
 # ICLR_CAMIL
+This is the implementation of our ICLR (spotlight) [paper](https://arxiv.org/abs/2305.05314)
 
 If you use this code, please cite our work using:
 ```bibtex

@@ -79,7 +79,7 @@ class DataGenerator(tf.keras.utils.Sequence):
 
         #sparse_matrix = self.get_affinity(neighbor_indices[:, :4])
 
-        Idx = neighbor_indices[:, :self.k]
+        Idx = neighbor_indices[:, :8]
         rows = np.asarray([[enum] * len(item) for enum, item in enumerate(Idx)]).ravel()
 
         columns = Idx.ravel()

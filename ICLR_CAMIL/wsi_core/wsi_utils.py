@@ -7,6 +7,14 @@ from PIL import Image
 import math
 import cv2
 
+'''
+This repository has been copied from https://github.com/mahmoodlab/CLAM). 
+All original copyrights and licenses have been preserved. 
+
+'''
+
+
+
 def isWhitePatch(patch, satThresh=5):
     patch_hsv = cv2.cvtColor(patch, cv2.COLOR_RGB2HSV)
     return True if np.mean(patch_hsv[:,:,1]) < satThresh else False

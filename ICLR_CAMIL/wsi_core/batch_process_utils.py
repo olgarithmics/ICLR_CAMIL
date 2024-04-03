@@ -1,7 +1,13 @@
 import pandas as pd
 import numpy as np
 
+
+
+
 '''
+This repository has been copied from https://github.com/mahmoodlab/CLAM). 
+All original copyrights and licenses have been preserved. 
+
 initiate a pandas df describing a list of slides to process
 args:
 	slides (df or array-like): 

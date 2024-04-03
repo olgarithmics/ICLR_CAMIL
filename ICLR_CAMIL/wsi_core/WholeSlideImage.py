@@ -16,6 +16,13 @@ from utils.file_utils import load_pkl, save_pkl
 
 Image.MAX_IMAGE_PIXELS = 933120000
 
+
+'''
+This repository has been copied from https://github.com/mahmoodlab/CLAM). 
+All original copyrights and licenses have been preserved. 
+
+'''
+
 class WholeSlideImage(object):
     def __init__(self, path):
 

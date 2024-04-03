@@ -1,0 +1,84 @@
+h5_files
+heatmaps
+lipo_csv_files
+mask
+camelyon_SIMCLR_checkpoints
+camelyon_Saved_model
+
+
+./.ipynb_checkpoints
+*ipynb
+./Saved_model
+*.txt
+*.err
+/camelyon_results
+# Byte-compiled / optimized / DLL files
+__pycache__/
+training/__pycache__/
+wsi_core/__pycache__/
+utils/__pycache__/
+dataset_utils/__pycache__/
+
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+token.txt
+
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit transformer_k / coverage reports
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Rope
+.ropeproject
+
+# Django stuff:
+*.log
+*.pot
+
+# Sphinx documentation
+docs/_build/
+mask
+lipo_csv_files
+
+results/
+results_fold0/
+tcga_results/
+vaegan_utils/__pycache__/
+camelyon_results/
+
+.../__pycache__/
+.DS_Store
+.idea
+.ipynb_checkpoints/

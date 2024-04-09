@@ -1,5 +1,5 @@
 # CAMIL: Context-Aware Multiple Instance Learning for Cancer Detection and Subtyping in Whole Slide Images (ICLR 2024 spotlight)
-This is the implementation of [CAMIL](https://arxiv.org/abs/2305.05314) (work in progress)
+Tensorflow implementation for the multiple instance learning model described in the paper [CAMIL](https://arxiv.org/abs/2305.05314) (work in progress)
 
 ![Pipeline](assets/pipeline.png "An overview of the CAMIL model architecture. First, WSIs are preprocessed to separate tissue
 from the background. Then, the WSIs are split into fixed-size tiles of size 256 × 256 and fed through a pre-
@@ -10,17 +10,33 @@ patches, generating a neighborhood descriptor of each tile’s closest neighbors
 coefficients. The output layer then aggregates the tile-level attention scores produced in the previous layer to
 emit a final slide classification score.")
 
-Abstract:
-> The visual examination of tissue biopsy sections is fundamental for cancer diagnosis, with pathologists analyzing sections at multiple magnifications to discern tumor cells and their subtypes. However, existing attention-based multiple instance learning (MIL) models used for analyzing Whole Slide Images (WSIs) in cancer diagnostics often overlook the contextual information of tumor and neighboring tiles, leading to misclassifications. To address this, we propose the Context-Aware Multiple Instance Learning (CAMIL) architecture. CAMIL incorporates neighbor-constrained attention to consider dependencies among tiles within a WSI and integrates contextual constraints as prior knowledge into the MIL model. We evaluated CAMIL on subtyping non-small cell lung cancer (TCGA-NSCLC) and detecting lymph node (CAMELYON16 and CAMELYON17) metastasis, achieving test AUCs of 97.5\%, 95.9\%, and 88.1\%, respectively, outperforming other state-of-the-art methods. Additionally, CAMIL enhances model interpretability by identifying regions of high diagnostic value.
+## Installation
+Two separate conda environments are used for different stages of the workflow:
+- `dl_torch` for WSI preprocessing and feature extraction
+- `alma` for model training and evaluation
 
-
+To create and activate these environments, run the following commands:
+```bash
+$ conda env create --name torch_env --file torch_env.yml
+$ conda activate torch_env
+```
 ## WSI preprocessing
 we follow the CLAM's WSI processing solution (https://github.com/mahmoodlab/CLAM)
 
 ```bash
 # WSI Segmentation and Patching
-python create_patches_fp.py --source DATA_DIRECTORY --save_dir RESULTS_DIRECTORY --patch_size 256 --preset bwh_biopsy.csv --seg --patch --stitch
+python create_patches_fp.py --source DATA_DIRECTORY --save_dir PATCHES_RESULTS_DIRECTORY --patch_size 256 --preset bwh_biopsy.csv --seg --patch --stitch
 ```
+
+## Feature extraction
+This script computes features using pre-trained weights and saves the results in the specified output directory
+```bash
+# WSI Segmentation and Patching
+python feature_extractor/compute_feats.py  --weights weight_dir/*.pth  --dataset "PATCHES_RESULTS_DIRECTORY/*" --output FEAT_RESULTS_DIRECTORY --slide_dir DATA_DIRECTORY 
+```
+- `weight_dir`: Directory containing checkpoints, one from the CTGA lung and the other from Calmeyon-16.
+- `output_dir`: Directory where the H5 files are stored.
+- `slide_dir`: Directory where the slides are stored.
 
 If you use this code, please cite our work using:
 ```bibtex

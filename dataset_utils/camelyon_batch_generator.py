@@ -9,14 +9,11 @@ from sklearn.preprocessing import OneHotEncoder
 class DataGenerator(tf.keras.utils.Sequence):
     def __init__(self, filenames, args, shuffle=False, train=True, batch_size=1):
         self.filenames = filenames
-
         self.train = train
         self.batch_size = batch_size
-        self.k = args.k
         self.shuffle = shuffle
         self.label_file = args.label_file
         self.on_epoch_end()
-
         self.enc = OneHotEncoder(handle_unknown='ignore')
 
     def __len__(self):
@@ -61,30 +58,19 @@ class DataGenerator(tf.keras.utils.Sequence):
 
                 features = hdf5_file['features'][:]
 
-                #sparse_coords = hdf5_file['adj_coords'][:]
                 neighbor_indices = hdf5_file['indices'][:]
 
                 values = hdf5_file['similarities'][:]
-
-                if self.shuffle:
-                    randomize = np.arange(neighbor_indices.shape[0])
-                    np.random.shuffle(randomize)
-                    features = features[randomize]
-                    neighbor_indices = neighbor_indices[randomize]
-                    values = values[randomize]
+                values = np.nan_to_num(values)
 
                 references = pd.read_csv(self.label_file)
 
                 bag_label = references["slide_label"].loc[references["slide_id"] == base_name].values.tolist()[0]
 
-        #sparse_matrix = self.get_affinity(neighbor_indices[:, :4])
-
         Idx = neighbor_indices[:, :8]
         rows = np.asarray([[enum] * len(item) for enum, item in enumerate(Idx)]).ravel()
 
         columns = Idx.ravel()
-
-        values = np.reshape(values, (neighbor_indices.shape[0], neighbor_indices.shape[1]))
 
         neighbor_matrix = values[:, 1:]
         normalized_matrix = preprocessing.normalize(neighbor_matrix, norm="l2")
@@ -93,7 +79,7 @@ class DataGenerator(tf.keras.utils.Sequence):
 
         values = np.concatenate((np.max(similarities, axis=1).reshape(-1, 1), similarities), axis=1)
 
-        values = values[:, :self.k]
+        values = values[:, :8]
 
         values = values.ravel().tolist()
 
@@ -105,5 +91,3 @@ class DataGenerator(tf.keras.utils.Sequence):
         sparse_matrix = tf.sparse.reorder(sparse_matrix)
 
         return features, sparse_matrix, bag_label
-
-

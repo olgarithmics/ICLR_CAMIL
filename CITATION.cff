@@ -16,8 +16,8 @@ url: "https://github.com/olgarithmics/ICLR_CAMIL/"
 preferred-citation:
   type: article
   authors:
-  - family-names: "Olga"
-    given-names: "Fourkioti"
+  - family-names: "Fourkioti"
+    given-names: "Olga"
     orcid: "https://orcid.org/0000-0000-0000-0000"
   - family-names: "{De Vries}"
     given-names: "Matt"

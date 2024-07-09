@@ -84,3 +84,8 @@ camelyon_results/
 .DS_Store
 .idea
 .ipynb_checkpoints/
+
+saved_models/
+token
+weight_dir/
+

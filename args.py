@@ -30,7 +30,7 @@ def parse_args():
     parser.add_argument('--config_file', type=str, default="heatmap_config_template.yaml")
     parser.add_argument('--subtyping', dest="subtyping",action='store_true', default=False)
     parser.add_argument('--n_classes', default=2, type=int)
-
+    parser.add_argument('--test', action='store_true', default=False, help='test only')
 
     args = parser.parse_args()
     return args

@@ -1,6 +1,6 @@
 import cl as cl
 import torch
-from dataset_utils.dataset_h5 import Whole_Slide_Bag_FP
+from loader_utils.dataset_h5 import Whole_Slide_Bag_FP
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchvision.transforms.functional as VF
@@ -119,37 +119,64 @@ def generate_values_resnet(images, wsi_coords, dist="cosine"):
     return np.array(coords), values, neighbor_indices
 
 
-def adj_matrix(wsi_coords, wsi_feats):
-    total = wsi_coords.shape[0]
 
-    patch_distances = pairwise_distances(wsi_coords, metric='euclidean', n_jobs=1)
-    neighbor_indices = np.argsort(patch_distances, axis=1)[:, :16]
-    values = []
-    adj_coords = []
+def compute_feats( bags_list, i_classifier, data_slide_dir, save_path):
+    num_bags = len(bags_list)
 
-    for i in range(total - 1):
-        x_i, y_i = wsi_coords[i][0], wsi_coords[i][1]
-        indices = neighbor_indices[i]
-        sum = 0
-        graphs = []
-        for j in indices:
-            x_j, y_j = wsi_coords[j][0], wsi_coords[j][1]
+    for i in range(0, num_bags):
 
-            if abs(int(x_i) - int(x_j)) <= 512 and abs(int(y_i) - int(y_j)) <= 512:
-                m1 = np.expand_dims(wsi_feats[int(i)], axis=0)
-                m2 = np.expand_dims(wsi_feats[int(j)], axis=0)
-                value = distance.cdist(m1.reshape(1, -1), m2.reshape(1, -1), 'euclidean')[0][0]
+        slide_id = os.path.splitext(os.path.basename(bags_list[i]))[0]
+        output_path = os.path.join(save_path, 'h5_files/')
 
-                graphs.append(value)
-                adj_coords.append((i, j))
-                sum += 1
-            if sum == 5:
-                break
+        if os.path.exists(os.path.join(data_slide_dir, slide_id +'.tiff')):
+            slide_file_path = os.path.join(data_slide_dir, slide_id + '.tiff')
+            wsi = openslide.open_slide(slide_file_path)
+        else:
+            slide_file_path = os.path.join(data_slide_dir, slide_id + '.svs')
+            wsi = openslide.open_slide(slide_file_path)
 
-        graphs = preprocessing.normalize(np.array(graphs).reshape(1, -1), norm="l2")
-        graphs = np.exp(-graphs)
+        output_path_file = os.path.join(save_path, 'h5_files/' + slide_id + '.h5')
+        if os.path.exists(output_path_file):
+            continue
 
-        values.append(graphs.tolist()[0])
+        os.makedirs(output_path, exist_ok=True)
+
+        dataset = Whole_Slide_Bag_FP(file_path=bags_list[i],wsi=wsi, custom_transforms=Compose([transforms.ToTensor()]))
+        dataloader = DataLoader(dataset=dataset, batch_size=512, collate_fn=collate_features, drop_last=False, shuffle=False)
+
+        mode = 'w'
+        wsi_coords=[]
+        wsi_feats=[]
+        for count, (batch, coords) in enumerate(dataloader):
+            with torch.no_grad():
+                batch = batch.to(device, non_blocking=True)
+                wsi_coords.append(coords)
+                features, classes = i_classifier(batch)
+
+                features = features.cpu().numpy()
+                wsi_feats.append(features)
+                asset_dict = {'features': features, 'coords': coords}
+                save_hdf5(output_path_file, asset_dict, attr_dict=None, mode=mode)
+                mode = 'a'
+
+        wsi_coords = np.vstack(wsi_coords)
+        wsi_feats = np.vstack(wsi_feats)
+
+        print('features size: ', wsi_feats.shape, flush=True)
+
+        adj_coords, similarities, neighbor_indices = generate_values_resnet(wsi_feats, wsi_coords)
+
+        asset_dict = {'adj_coords': adj_coords, 'similarities': similarities, 'indices': neighbor_indices}
+
+        save_hdf5(output_path_file, asset_dict, attr_dict=None, mode=mode)
+
+        file = h5py.File(output_path_file, "r")
+        print('features size: ', wsi_feats.shape, flush=True)
+        print('similarities: ', file['similarities'][:].shape, flush=True)
+        features = torch.from_numpy(wsi_feats).cuda()
+        os.makedirs(os.path.join(save_path, 'pt_files'), exist_ok=True)
+        torch.save(features, os.path.join(save_path, 'pt_files', slide_id + '.pt'))
+
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 def main():
@@ -188,9 +215,6 @@ def main():
     if args.backbone == 'resnet101':
         resnet = models.resnet101(pretrained=False, norm_layer=nn.InstanceNorm2d)
         num_feats = 2048
-    if args.backbone == 'resnet18-pretrained':
-        resnet = models.resnet18(pretrained=False, norm_layer=nn.InstanceNorm2d)
-        num_feats = 512
     for param in resnet.parameters():
         param.requires_grad = False
     resnet.fc = nn.Identity()
@@ -204,25 +228,15 @@ def main():
     os.makedirs(args.output, exist_ok=True)
     bags_list = glob.glob(args.dataset)
 
-    if args.backbone != 'tenpercent_resnet18':
-        state_dict_weights = torch.load(args.weights)
-        state_dict_init = i_classifier.state_dict()
-        new_state_dict = OrderedDict()
-        for (k, v), (k_0, v_0) in zip(state_dict_weights.items(), state_dict_init.items()):
-            name = k_0
-            new_state_dict[name] = v
-        i_classifier.load_state_dict(new_state_dict, strict=False)
-        compute_feats(bags_list, i_classifier, args.slide_dir, args.output)
-    else:
-        state = torch.load(args.weights, map_location='cuda:0')
-        state_dict = state['state_dict']
-        for key in list(state_dict.keys()):
-            state_dict[key.replace('model.', '').replace('resnet.', '')] = state_dict.pop(key)
 
-        model = load_model_weights(resnet, state_dict)
-        model.fc =  torch.nn.Sequential()
-        compute_feats(bags_list, model, args.slide_dir, args.output)
-
+    state_dict_weights = torch.load(args.weights)
+    state_dict_init = i_classifier.state_dict()
+    new_state_dict = OrderedDict()
+    for (k, v), (k_0, v_0) in zip(state_dict_weights.items(), state_dict_init.items()):
+        name = k_0
+        new_state_dict[name] = v
+    i_classifier.load_state_dict(new_state_dict, strict=False)
+    compute_feats(bags_list, i_classifier, args.slide_dir, args.output)
 if __name__ == '__main__':
     main()
 

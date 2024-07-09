@@ -34,9 +34,42 @@ This script computes features using pre-trained weights and saves the results in
 # WSI Segmentation and Patching
 python feature_extractor/compute_feats.py  --weights weight_dir/*.pth  --dataset "PATCHES_RESULTS_DIRECTORY/*" --output FEAT_RESULTS_DIRECTORY --slide_dir DATA_DIRECTORY 
 ```
-- `weight_dir`: Directory containing checkpoints, one from the CTGA lung and the other from Calmeyon-16.
+- `weight_dir`: Directory containing checkpoints, one from the TCGA-NSCLC and the other from Calmeyon-16.
 - `output_dir`: Directory where the H5 files are stored.
 - `slide_dir`: Directory where the slides are stored.
+
+You can download the precomputed features here: [Link to Google Drive](https://drive.google.com/drive/u/0/folders/1S6vDfKQAtikG2c50hZix6eAVPe7xI3FK)
+
+
+## Train
+This script computes features using pre-trained weights and saves the results in the specified output directory
+```bash
+python run.py --experiment_name EXP_NAME --epoch 30 --feature_path FEAT_RESULTS_DIRECTORY --label_file LABEL_FILE --csv_file SPLIT_DIR --save_dir WEIGHT_DIR
+```
+-  `experiment_name`: The name of the experiment.
+-  `epoch`: The number of training epochs.
+-  `feature_path`: The path where the features are stored.
+-  `label_file`: The path to the CSV file containing labels.
+-  `csv_file`: The path to the CSV file containing data splits.
+-  `save_dir`: The directory where the weights are saved stored.
+- 
+The label file should be a CSV file with the following comma-separated fields:
+case_id, slide_id, label, slide_label
+
+
+## Test
+This script computes features using pre-trained weights and saves the results in the specified output directory
+```bash
+python run.py --experiment_name EXP_NAME  --test  --feature_path FEAT_RESULTS_DIRECTORY --label_file LABEL_FILE --csv_file SPLIT_DIR --save_dir WEIGHT_DIR
+```
+-  `experiment_name`: The name of the experiment.
+-  `feature_path`: The path where the features are stored.
+-  `label_file`: The path to the CSV file containing labels.
+-  `csv_file`: The path to the CSV file containing data splits.
+-  `save_dir`: The directory where the weights are saved stored.
+-  `test`: Flag indicating the test stage 
+
+
 
 If you use this code, please cite our work using:
 ```bibtex

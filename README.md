@@ -38,8 +38,6 @@ python feature_extractor/compute_feats.py  --weights weight_dir/*.pth  --dataset
 - `output_dir`: Directory where the H5 files are stored.
 - `slide_dir`: Directory where the slides are stored.
 
-You can download the precomputed features here: [Link to Google Drive](https://drive.google.com/drive/u/0/folders/1S6vDfKQAtikG2c50hZix6eAVPe7xI3FK)
-
 
 ## Train
 This script computes features using pre-trained weights and saves the results in the specified output directory

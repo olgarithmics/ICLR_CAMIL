@@ -1,9 +1,6 @@
 # CAMIL: Context-Aware Multiple Instance Learning for Cancer Detection and Subtyping in Whole Slide Images (ICLR 2024 spotlight)
 Tensorflow implementation for the multiple instance learning model described in the paper [CAMIL](https://arxiv.org/abs/2305.05314) (work in progress)
 
-![Pipeline](assets/pipeline.png "An overview of the CAMIL model architecture.")
-
-
 ### **Pipeline Overview**
 ![Pipeline](assets/pipeline.png "Overview of the CAMIL model architecture.")
 
